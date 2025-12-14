@@ -4,7 +4,7 @@
   "description": "A custom-built battleship game",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --watchAll --verbose",
     "start": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "deploy": "git subtree push --prefix dist origin gh-pages"
@@ -21,8 +21,13 @@
   },
   "homepage": "https://github.com/goldenvertex42/battleship#readme",
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0",
+    "baseline-browser-mapping": "^2.9.7",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.4",
+    "jest": "^30.2.0",
     "style-loader": "^4.0.0",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1",
