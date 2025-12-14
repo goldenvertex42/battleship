@@ -1,0 +1,32 @@
+{
+  "name": "default-template",
+  "version": "1.0.0",
+  "description": "A repository that has webpack configured for both development and production, an html skeleton, a css reset, and an index.js with styles imported and a console.log",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "deploy": "git subtree push --prefix dist origin gh-pages"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goldenvertex42/default-template.git"
+  },
+  "keywords": [],
+  "author": "Denver Clark <fabled93@gmail.com> (https://github.com/goldenvertex42)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goldenvertex42/default-template/issues"
+  },
+  "homepage": "https://github.com/goldenvertex42/default-template#readme",
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.4",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2",
+    "webpack-merge": "^6.0.1"
+  }
+}
