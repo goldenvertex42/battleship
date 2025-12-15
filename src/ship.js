@@ -1,14 +1,17 @@
-export default class Ship {
-    constructor(length) {
-        this.length = length;
-        this.hits = 0;
+export default Ship = (length) => {
+    let hits = 0;
+    
+    const hit = () => {
+        hits++;
     }
 
-    hit() {
-        this.hits++;
+    const isSunk = () => {
+        return hits >= length;
     }
 
-    isSunk() {
-        return this.hits >= this.length;
-    }
-}
+    return {
+        length,
+        hit,
+        isSunk
+    };
+};

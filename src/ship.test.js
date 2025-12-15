@@ -1,8 +1,8 @@
 import Ship from "./ship";
 
-describe('Ship Class', () => {
+describe('Ship Factory', () => {
     test('ship should expose length property', () => {
-        const testShip = new Ship(3);
+        const testShip = Ship(3);
         expect(testShip.length).toBe(3);
     })
 
@@ -10,7 +10,7 @@ describe('Ship Class', () => {
         let testShip;
 
         beforeEach(() => {
-            testShip = new Ship(2);
+            testShip = Ship(2);
         })
 
         test('isSunk returns false initially', () => {
