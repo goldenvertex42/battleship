@@ -33,30 +33,30 @@ describe('Gameboard Factory', () => {
             mockShip = ship(3);
         });
 
-        const verticalCoords = [
+        const horizontalCoords = [
             [0, 0],
             [0, 1],
             [0, 2]
-        ];
-
-        test.each(verticalCoords)(
-            'places a vertical ship using the startCoords', 
-            (x, y) => {
-                board.placeShip(mockShip, startCoords, 'vertical');
-                expect(board.grid[x][y]).toBe(mockShip);
-            }
-        );
-        
-        const horizontalCoords = [
-            [0, 0],
-            [1, 0],
-            [2, 0]
         ];
 
         test.each(horizontalCoords)(
             'places a horizontal ship using the startCoords', 
             (x, y) => {
                 board.placeShip(mockShip, startCoords, 'horizontal');
+                expect(board.grid[x][y]).toBe(mockShip);
+            }
+        );
+        
+        const verticalCoords = [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+        ];
+
+        test.each(verticalCoords)(
+            'places a vertical ship using the startCoords', 
+            (x, y) => {
+                board.placeShip(mockShip, startCoords, 'vertical');
                 expect(board.grid[x][y]).toBe(mockShip);
             }
         ); 
@@ -84,12 +84,12 @@ describe('Gameboard Factory', () => {
         test('an attack on an already targeted hit cell returns already targeted', () => {
             board.receiveAttack([0, 1]);
             expect(board.receiveAttack([0, 1])).toBe('already targeted');
-        })
+        });
 
         test('an attack on an already targeted missed cell returns already targeted', () => {
             board.receiveAttack([5, 5]);
             expect(board.receiveAttack([5, 5])).toBe('already targeted');
-        })
+        });
     });
 
     describe('allShipsSunk function', () => {
@@ -109,14 +109,31 @@ describe('Gameboard Factory', () => {
 
         test('all ships are not sunk', () => {
             expect(board.allShipsSunk()).toBe(false);
-        })
+        });
 
         test('all ships are sunk', () => {
             board.receiveAttack([0, 0]);
             board.receiveAttack([5, 5]);
-            board.receiveAttack([5, 6]);
+            board.receiveAttack([6, 5]);
             expect(board.allShipsSunk()).toBe(true);
-        })
+        });
+    });
 
+    describe('automated ship placement', () => {
+        let board;
+        beforeEach(() => {
+            board = gameboard();
+        });
+
+        test('placeShipsRandomly places a full fleet without errors or collisions', () => {
+            const fleet = [{ length: 5 }, { length: 4 }, { length: 3 }, { length: 3 }, { length: 2 }];
+            
+            board.placeShipsRandomly(fleet);
+            
+            const cellsUsed = board.grid.flat().filter(cell => cell !== null && cell !== 'miss' && cell !== 'hit');
+            const totalShipLength = fleet.reduce((sum, ship) => sum + ship.length, 0);
+
+            expect(cellsUsed.length).toBe(totalShipLength);
+        });
     })
 });
