@@ -1,7 +1,9 @@
 import player from "./player";
 
-const computerPlayer = (name = 'Computer') => {
-    const basePlayer = player(name);
+const computerPlayer = (name = 'Computer', id) => {
+    const basePlayer = player(name, id);
+
+    const isComputer = true;
 
     const makeRandomAttack = (opponentBoard) => {
         let x, y, coordKey;
@@ -12,11 +14,13 @@ const computerPlayer = (name = 'Computer') => {
             coordKey = `${x},${y}`;
         } while (basePlayer.movesMade.has(coordKey));
 
-        return basePlayer.attack(opponentBoard, [x, y]);
+        const result = basePlayer.attack(opponentBoard, [x, y]);
+        return {x, y, result};
     }
 
     return {
         ...basePlayer,
+        isComputer,
         makeRandomAttack
     }
 }

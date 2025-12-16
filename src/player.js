@@ -1,6 +1,6 @@
 import gameboard from "./gameboard";
 
-const player = (name) => {
+const player = (name, id) => {
     const board = gameboard();
     const movesMade = new Set();
 
@@ -15,6 +15,7 @@ const player = (name) => {
 
     return {
         name,
+        id,
         board,
         attack,
         movesMade

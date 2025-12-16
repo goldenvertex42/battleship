@@ -5,8 +5,13 @@ import computerPlayer from "./computer-player";
 describe('Player Factory', () => {
 
     test('player can be initialized with a name property', () => {
-        const human = player('Denver');
+        const human = player('Denver', 1);
         expect(human.name).toBe('Denver');
+    });
+
+    test('player can be initialized with an id property', () => {
+        const human = player('Denver', 1);
+        expect(human.id).toBe(1);
     });
 
     test('player object contains an initialized gameboard', () => {
@@ -52,6 +57,10 @@ describe('Computer Player Factory', () => {
 
     afterEach(() => {
         mathRandomSpy.mockRestore();
+    });
+
+    test('computer player is initialized with isComputer property', () => {
+        expect(computer.isComputer).toBe(true);
     });
 
     test('makes an attack on random, valid coordinate', () => {
