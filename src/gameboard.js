@@ -4,11 +4,35 @@ const gameboard = () => {
     const grid = Array.from({ length: 10 }, () => Array(10).fill(null));
     const shipsPlaced = [];
 
+    const hasAdjacentShip = (grid, checkX, checkY) => {
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const neighborX = checkX + dx;
+                const neighborY = checkY + dy;
+
+                if (neighborX >= 0 && neighborX < 10 && neighborY >= 0 && neighborY < 10) {
+                    if (grid[neighborX][neighborY] !== null) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    
     const isValidPlacement = (grid, startX, startY, length, orientation) => {
         for (let i = 0; i < length; i++) {
             const x = startX + (orientation === 'vertical' ? i : 0);
             const y = startY + (orientation === 'horizontal' ? i : 0);
             if (x < 0 || x >= 10 || y < 0 || y >= 10 || grid[x][y] !== null) {
+                return false;
+            }
+        }
+
+        for (let i = 0; i < length; i++) {
+            const x = startX + (orientation === 'vertical' ? i : 0);
+            const y = startY + (orientation === 'horizontal' ? i : 0);
+            if (hasAdjacentShip(grid, x, y)) {
                 return false;
             }
         }
@@ -18,7 +42,7 @@ const gameboard = () => {
     const placeShip = (ship, startCoords, orientation) => {
         const [startX, startY] = startCoords;
         if (!isValidPlacement(grid, startX, startY, ship.length, orientation)) {
-            throw new Error('Invalid placement: out of bounds or a collision');
+            throw new Error('Invalid placement: out of bounds, collision, or too close to another');
         };
         for (let i = 0; i < ship.length; i++) {
             const x = startX + (orientation === 'vertical' ? i : 0);
