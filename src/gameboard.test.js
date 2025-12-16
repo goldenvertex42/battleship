@@ -1,4 +1,5 @@
 import gameboard from "./gameboard";
+import ship from "./ship";
 
 describe('Gameboard Factory', () => {
     describe('gameboard grid', () => {
