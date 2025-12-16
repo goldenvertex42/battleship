@@ -349,3 +349,72 @@ template {
 }
 
 /** RESET END **/
+
+.title {
+  text-align: center;
+  font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', Charcoal, 'Helvetica Inserat', 'Bitstream Vera Sans Bold', 'Arial Black', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 0.4rem;
+}
+
+.main-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.name {
+  font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', Charcoal, 'Helvetica Inserat', 'Bitstream Vera Sans Bold', 'Arial Black', sans-serif;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.game-board {
+  display: grid;
+  /* Creates 10 columns, each taking up an equal fraction of the available space */
+  grid-template-columns: repeat(10, 1fr); 
+  /* Creates 10 rows, each taking up an equal fraction of the available space */
+  grid-template-rows: repeat(10, 1fr); 
+  width: 400px; /* Set the total width of the grid */
+  height: 400px; /* Set the total height of the grid */
+  border: 2px solid #333;
+}
+
+.cell {
+  border: 1px solid #333;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box; /* Ensure border is included in width/height */
+}
+
+.cell:hover {
+  background-color: #ddd;
+}
+
+.cell.ship-present {
+  border: 1px solid #333;
+  background-color: darkblue;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box; /* Ensure border is included in width/height */
+}
+
+.cell.hit {
+  border: 1px solid #333;
+  background-color: darkred;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box; /* Ensure border is included in width/height */
+}
+
+.cell.miss {
+  border: 1px solid #333;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box; /* Ensure border is included in width/height */
+}
