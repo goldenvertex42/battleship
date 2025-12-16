@@ -1,4 +1,4 @@
-export default ship = (length) => {
+const ship = (length) => {
     let hits = 0;
     
     const hit = () => {
@@ -15,3 +15,5 @@ export default ship = (length) => {
         isSunk
     };
 };
+
+export default ship;

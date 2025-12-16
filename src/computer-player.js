@@ -1,6 +1,6 @@
 import player from "./player";
 
-export default computerPlayer = (name = 'Computer') => {
+const computerPlayer = (name = 'Computer') => {
     const basePlayer = player(name);
 
     const makeRandomAttack = (opponentBoard) => {
@@ -20,3 +20,5 @@ export default computerPlayer = (name = 'Computer') => {
         makeRandomAttack
     }
 }
+
+export default computerPlayer;

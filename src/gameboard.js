@@ -1,6 +1,6 @@
 import ship from "./ship";
 
-export default gameboard = () => {
+const gameboard = () => {
     const grid = Array.from({ length: 10 }, () => Array(10).fill(null));
     const shipsPlaced = [];
 
@@ -76,3 +76,5 @@ export default gameboard = () => {
         placeShipsRandomly
     };
 }
+
+export default gameboard;
