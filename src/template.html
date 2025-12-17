@@ -8,20 +8,44 @@
 <body>
     <h1 class="title">Battleship</h1>
     <div class="main-container">
-        <div class="board-container">
-            <h1 class="name">Player 1</h1>
-            <div id="player1-board" class="game-board">
+        <!-- Screen 1: Game Mode Selection -->
+        <div id="setup-screen" class="screen">
+            <h2>Select Game Mode</h2>
+            <button id="pvc-btn">Vs Computer</button>
+            <button id="pvp-btn">Vs Player</button>
+        </div>
 
+        <!-- Screen 2: Name Entry -->
+        <div id="name-screen" class="screen hidden">
+            <label id="name-label-1" for="player1-name-input">Player 1 Name:</label>
+            <input type="text" id="player1-name-input">
+            <label id="name-label-2" for="player2-name-input">Player 2 Name:</label>
+            <input type="text" id="player2-name-input">
+            <button id="start-placement-btn">Continue</button>
+        </div>
+
+        <!-- Screen 3: Placement & Game Area -->
+        <div id="game-screen" class="screen hidden">
+            <div id="placement-controls">
+                <h3 id="placement-message">Place your Carrier (Length: 5)</h3>
+                <button id="rotate-btn">Rotate: Horizontal</button>
+            </div>
+            <div id="boards-container">
+                <div class="board-wrapper">
+                    <div id="player1-name"></div>
+                    <div id="player1-board" class="game-board"></div>
+                </div>
+                <div class="board-wrapper">
+                    <div id="player2-name"></div>
+                    <div id="player2-board" class="game-board"></div>
+                </div>
+                <div id="controls-area">
+                    <button id="end-turn-btn" class="hidden">End Turn</button>
+                </div>
             </div>
         </div>
-        <div class="board-container">
-            <h1 class="name">Player 2</h1>
-            <div id="player2-board" class="game-board">
-
-            </div>
-        </div>
-        <div class="message-container">
-            
+        <div id="message-area">
+       
         </div>
     </div>
 </body>

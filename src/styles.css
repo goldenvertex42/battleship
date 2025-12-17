@@ -350,71 +350,209 @@ template {
 
 /** RESET END **/
 
-.title {
-  text-align: center;
-  font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', Charcoal, 'Helvetica Inserat', 'Bitstream Vera Sans Bold', 'Arial Black', sans-serif;
-  font-size: 3rem;
-  letter-spacing: 0.4rem;
+:root {
+  --bg-color: #f0f4f8;
+  --board-bg: #ffffff;
+  --cell-border: #cbd5e0;
+  --water-color: #ebf8ff;
+  --ship-color: #4a5568;
+  --hit-color: #f56565;
+  --miss-color: #a0aec0;
+  --active-highlight: #4299e1;
 }
 
-.main-container {
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
 }
 
-.name {
-  font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', Charcoal, 'Helvetica Inserat', 'Bitstream Vera Sans Bold', 'Arial Black', sans-serif;
-  font-size: 2rem;
-  text-align: center;
+h1 {
+  color: #2d3748;
+  margin-bottom: 30px;
 }
 
+/* Screen Management */
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Boards Container */
+#boards-container {
+  display: flex;
+  gap: 50px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Player Names Display */
+.board-wrapper h2 {
+  font-size: 1.5rem;
+  color: #4a5568;
+  margin-bottom: 15px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.active-turn {
+  background-color: var(--active-highlight);
+  color: white !important;
+  box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4);
+}
+
+/* The Battleship Grid */
 .game-board {
   display: grid;
-  /* Creates 10 columns, each taking up an equal fraction of the available space */
-  grid-template-columns: repeat(10, 1fr); 
-  /* Creates 10 rows, each taking up an equal fraction of the available space */
-  grid-template-rows: repeat(10, 1fr); 
-  width: 400px; /* Set the total width of the grid */
-  height: 400px; /* Set the total height of the grid */
-  border: 2px solid #333;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+  background-color: var(--board-bg);
+  border: 3px solid #2d3748;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .cell {
-  border: 1px solid #333;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box; /* Ensure border is included in width/height */
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--cell-border);
+  background-color: var(--water-color);
+  cursor: crosshair;
+  transition: background-color 0.2s;
 }
 
 .cell:hover {
-  background-color: #ddd;
+  background-color: #bee3f8;
 }
 
+/* Cell States */
 .cell.ship-present {
-  border: 1px solid #333;
-  background-color: darkblue;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box; /* Ensure border is included in width/height */
-}
-
-.cell.hit {
-  border: 1px solid #333;
-  background-color: darkred;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box; /* Ensure border is included in width/height */
+  background-color: var(--ship-color);
 }
 
 .cell.miss {
-  border: 1px solid #333;
-  background-color: black;
+  background-color: var(--miss-color);
+  position: relative;
+}
+
+/* Add a visual "dot" for misses */
+.cell.miss::after {
+  content: "•";
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+}
+
+.cell.hit {
+  background-color: var(--hit-color);
+  border-color: #c53030;
+}
+
+/* UI Elements: Buttons & Messages */
+#message-area {
+  margin-top: 30px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #2d3748;
+  height: 1.5em;
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #4299e1;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #3182ce;
+}
+
+/* Input Styles */
+input[type="text"] {
+  padding: 10px;
+  font-size: 1rem;
+  border: 2px solid var(--cell-border);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* The Full-Screen Overlay */
+#pass-device-cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(26, 32, 44, 0.95); /* Deep slate blue/black */
+  backdrop-filter: blur(8px);               /* Modern blur effect */
   display: flex;
   justify-content: center;
   align-items: center;
-  box-sizing: border-box; /* Ensure border is included in width/height */
+  z-index: 9999;                             /* Ensure it's on top of everything */
+}
+
+/* The Modal Box inside the cover */
+.modal-content {
+  background-color: white;
+  padding: 40px 60px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+}
+
+.modal-content h2 {
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+/* Ready Button */
+#ready-btn {
+  background-color: #48bb78; /* Green to signal "go" */
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#ready-btn:hover {
+  background-color: #38a169;
+  transform: scale(1.05);
+}
+
+#ready-btn:active {
+  transform: scale(0.95);
 }
