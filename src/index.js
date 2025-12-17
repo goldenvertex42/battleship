@@ -1,3 +1,4 @@
 import "./styles.css";
+import { init } from "./state-manager";
 
-console.log("This is goldenvertex's default template");
+init();
