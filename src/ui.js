@@ -1,6 +1,6 @@
 import gameboard from "./gameboard";
 
-function renderPlayerBoard(containerId, gameboard, handler, isPlayerBoard) {
+export function renderPlayerBoard(containerId, gameboard, handler, showShips) {
     const container = document.getElementById(containerId);
     
     if (!container) return;
@@ -20,11 +20,11 @@ function renderPlayerBoard(containerId, gameboard, handler, isPlayerBoard) {
                 cell.classList.add('miss');
             } else if (cellStatus === 'hit') {
                 cell.classList.add('hit');
-            } else if (isPlayerBoard && cellStatus !== null) {
+            } else if (cellStatus !== null && showShips) {
                 cell.classList.add('ship-present');
             }
 
-            if (!isPlayerBoard && handler) {
+            if (handler) {
                 cell.addEventListener('click', handler);
             }
 
@@ -33,22 +33,56 @@ function renderPlayerBoard(containerId, gameboard, handler, isPlayerBoard) {
     }
 }
 
-export function initializeBoardsVersusPC(player1, player2, p2handler) {
-    renderPlayerBoard('player1-board', player1.board, null, true);
-    renderPlayerBoard('player2-board', player2.board, p2handler, false);
+export function displayMessage(msg) {
+    document.querySelector('#message-area').textContent = msg;
 }
 
-export function updateCellVisual(containerId, x, y, result) {
-    const container = document.getElementById(containerId);
-    const cell = container.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-    
-    if (cell) {
-        cell.classList.add(result);
-        cell.style.pointerEvents = 'none';
+export function highlightActivePlayer(playerId) {
+    const p1Label = document.getElementById('player1-name');
+    const p2Label = document.getElementById('player2-name');
+
+    p1Label.classList.toggle('active-turn', playerId === 1);
+    p2Label.classList.toggle('active-turn', playerId === 2);
+}
+
+export function showPassDeviceScreen(nextPlayerName, callback) {
+    const cover = document.createElement('div');
+    cover.id = 'pass-device-cover';
+    cover.innerHTML = `
+            <div class="modal">
+                <h2>Pass Device to ${nextPlayerName}</h2>
+                <button id="ready-btn">I am Ready</button>
+            </div>
+        `;
+    document.body.appendChild(cover);
+    document.getElementById('ready-btn').onclick = () => {
+        document.body.removeChild(cover);
+        callback();
+    };
+}
+
+export function hide(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.classList.add('hidden');
     }
 }
 
-export function displayMessage(msg) {
-    document.querySelector('.message-container').textContent = msg;
+export function show(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.classList.remove('hidden');
+    }
 }
 
+export function updatePlayerNames(name1, name2) {
+    const p1NameDisplay = document.getElementById('player1-name');
+    const p2NameDisplay = document.getElementById('player2-name');
+
+    if (p1NameDisplay) p1NameDisplay.textContent = name1;
+    if (p2NameDisplay) p2NameDisplay.textContent = name2;
+}
+
+export function hideAllShips(containerId, gameboard) {
+    renderPlayerBoard(containerId, gameboard, null, false);
+}
