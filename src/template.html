@@ -27,8 +27,11 @@
         <!-- Screen 3: Placement & Game Area -->
         <div id="game-screen" class="screen hidden">
             <div id="placement-controls">
-                <h3 id="placement-message">Place your Carrier (Length: 5)</h3>
-                <button id="rotate-btn">Rotate: Horizontal</button>
+                <h3 id="placement-message"></h3>
+                <button id="rotate-btn">Rotate: Vertical</button>
+                <button id="random-placement">Place Randomly</button>
+                <div class="ship-container"></div>
+                <button id="reset-btn">Reset Ships</button>
             </div>
             <div id="boards-container">
                 <div class="board-wrapper">
@@ -41,11 +44,15 @@
                 </div>
                 <div id="controls-area">
                     <button id="end-turn-btn" class="hidden">End Turn</button>
+                    <button id="done" class="hidden">Done</button>
                 </div>
             </div>
         </div>
-        <div id="message-area">
-       
+        <div id="message-area"></div>
+        <div id="play-again-screen" class="screen hidden">
+            <h2>Game Over!</h2>
+            <p id="final-message">Player X Wins!</p>
+            <button id="restart-btn">Play Again</button>
         </div>
     </div>
 </body>
