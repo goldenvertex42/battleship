@@ -8,11 +8,12 @@ describe('Ship Factory', () => {
 
     describe('public methods', () => {
         let testShip;
+        let coords;
 
         beforeEach(() => {
             testShip = ship(2);
         })
-
+        
         test('isSunk returns false initially', () => {
             expect(testShip.isSunk()).toBe(false);
         })
@@ -24,5 +25,16 @@ describe('Ship Factory', () => {
             testShip.hit();
             expect(testShip.isSunk()).toBe(true);
         }) 
+
+        describe('ship coordinates', () => {
+            beforeEach(() => {
+                coords = ([0, 0], [0, 1]);
+            })
+            
+            test('should store grid coordinates', () => {
+                testShip.setCoordinates(coords);
+                expect(testShip.getCoordinates()).toEqual(coords);
+            })
+        })
     })
 })

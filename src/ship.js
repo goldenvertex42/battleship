@@ -1,5 +1,6 @@
 const ship = (length) => {
     let hits = 0;
+    let coordinates = [];
     
     const hit = () => {
         hits++;
@@ -9,10 +10,18 @@ const ship = (length) => {
         return hits >= length;
     }
 
+    const setCoordinates = (coords) => {
+        coordinates = coords;
+    }
+
+    const getCoordinates = () => coordinates;
+
     return {
         length,
         hit,
-        isSunk
+        isSunk,
+        setCoordinates,
+        getCoordinates
     };
 };
 
