@@ -4,6 +4,13 @@ const gameboard = () => {
     const grid = Array.from({ length: 10 }, () => Array(10).fill(null));
     const shipsPlaced = [];
 
+    const reset = () => {
+        for (let i = 0; i < 10; i++) {
+            grid[i].fill(null);
+        }
+        shipsPlaced.length = 0;
+    };
+    
     const hasAdjacentShip = (grid, checkX, checkY) => {
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -20,36 +27,50 @@ const gameboard = () => {
         }
     }
     
-    const isValidPlacement = (grid, startX, startY, length, orientation) => {
-        for (let i = 0; i < length; i++) {
-            const x = startX + (orientation === 'vertical' ? i : 0);
-            const y = startY + (orientation === 'horizontal' ? i : 0);
-            if (x < 0 || x >= 10 || y < 0 || y >= 10 || grid[x][y] !== null) {
+    const isValidPlacement = (grid, x, y, length, orientation) => {
+        const startX = Number(x);
+        const startY = Number(y);
+        const shipLength = Number(length);
+        
+        if (startX < 0 || startY < 0 || startX >= 10 || startY >= 10) return false;
+
+        if (orientation === 'vertical' && startX + shipLength > 10) return false; 
+        if (orientation === 'horizontal' && startY + shipLength > 10) return false; 
+        
+        for (let i = 0; i < shipLength; i++) {
+            const checkX = startX + (orientation === 'vertical' ? i : 0);
+            const checkY = startY + (orientation === 'horizontal' ? i : 0);
+            if (grid[checkX][checkY] !== null) {
                 return false;
             }
         }
 
-        for (let i = 0; i < length; i++) {
-            const x = startX + (orientation === 'vertical' ? i : 0);
-            const y = startY + (orientation === 'horizontal' ? i : 0);
-            if (hasAdjacentShip(grid, x, y)) {
+        for (let i = 0; i < shipLength; i++) {
+            const checkX = startX + (orientation === 'vertical' ? i : 0);
+            const checkY = startY + (orientation === 'horizontal' ? i : 0);
+            if (hasAdjacentShip(grid, checkX, checkY)) {
                 return false;
             }
         }
+        
         return true;
     }
     
     const placeShip = (ship, startCoords, orientation) => {
         const [startX, startY] = startCoords;
+        const shipCoords = [];
         if (!isValidPlacement(grid, startX, startY, ship.length, orientation)) {
             throw new Error('Invalid placement: out of bounds, collision, or too close to another');
         };
         for (let i = 0; i < ship.length; i++) {
             const x = startX + (orientation === 'vertical' ? i : 0);
             const y = startY + (orientation === 'horizontal' ? i : 0);
-
+        
             grid[x][y] = ship;
+            
+            shipCoords.push([x, y]);
         }
+        ship.setCoordinates(shipCoords);
         shipsPlaced.push(ship);
         return true;
     }
@@ -94,8 +115,10 @@ const gameboard = () => {
     
     return {
         grid,
+        reset,
         placeShip,
         receiveAttack,
+        isValidPlacement,
         allShipsSunk,
         placeShipsRandomly
     };

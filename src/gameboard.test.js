@@ -24,6 +24,16 @@ describe('Gameboard Factory', () => {
         });
     });
 
+    describe('reset function', () => {
+        test('reset() should empty the grid and ships array', () => {
+            const board = gameboard();
+            board.placeShip(ship(3), [0, 0], 'horizontal');
+            board.reset();
+            expect(board.grid[0][0]).toBe(null);
+            expect(board.allShipsSunk()).toBe(true);
+        })
+    })
+
     describe('placeShip function', () => {
         let board;
         let mockShip;
