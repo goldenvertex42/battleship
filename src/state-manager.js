@@ -12,6 +12,8 @@ let gameOver = false;
 let shipsPlaced = new Set();
 let activeShipData = null;
 let currentDomGrid = null;
+let targetStack = [];
+const computerShotMemory = createShotMap(10);
 
 const standardFleet = [
     { name: 'Carrier', length: 5 },
@@ -248,15 +250,21 @@ function switchTurnsPvP() {
 }
 
 function handleAttackClick(e) {
-    const x = +e.target.dataset.x;
-    const y = +e.target.dataset.y;
+    const x = Number(e.target.dataset.x);
+    const y = Number(e.target.dataset.y);
     if (gameOver) return;
-    console.log([x, y]);
+    const coords = [x, y];
+    const coordKey = `${x},${y}`;
 
     if (gameMode === 'PvC') {
         if (currentPlayer !== player1) return;
+        
+        if (player1.movesMade.has(coordKey)) {
+            ui.displayMessage('Already attacked here - try another coordinate!');
+            return;
+        }
 
-        player1.attack(player2.board, [x, y]);
+        player1.attack(player2.board, coords);
         
         ui.renderPlayerBoard('player2-board', player2.board, handleAttackClick, false);
 
@@ -266,12 +274,12 @@ function handleAttackClick(e) {
             switchCurrentPlayer();
             ui.highlightActivePlayer(2);
             ui.displayMessage("Computer is thinking...");
-            setTimeout(computerTurn, 800);
+            computerTurn();
         }
     } else {
         if (currentPlayer === player1) {
             
-            player1.attack(player2.board, [x, y]);
+            player1.attack(player2.board, coords);
             ui.renderPlayerBoard('player2-board', player2.board, null, false);
             if (player2.board.allShipsSunk()) {
                 endGame(player1.name);
@@ -279,7 +287,7 @@ function handleAttackClick(e) {
             ui.show('end-turn-btn');
         } else {
             
-            player2.attack(player1.board, [x, y]);
+            player2.attack(player1.board, coords);
             ui.renderPlayerBoard('player1-board', player1.board, null, false);
             if (player1.board.allShipsSunk()) {
                 endGame(player2.name);
@@ -295,21 +303,79 @@ const switchCurrentPlayer = () => {
 
 const computerTurn = () => {
     if (gameOver) return;
-    
-    player2.makeRandomAttack(player1.board);
+    setTimeout(() => {
+        const lastAttack = makeComputerMove();
+        recordComputerAttack(lastAttack.x, lastAttack.y, lastAttack.result);
+        if (lastAttack.result === 'hit') {
+            const neighbors = getValidNeighbors(lastAttack.x, lastAttack.y, computerShotMemory);
+            neighbors.forEach(coord => targetStack.push(coord));
+        }
 
-    ui.renderPlayerBoard('player1-board', player1.board, null, true);
+        ui.renderPlayerBoard('player1-board', player1.board, null, true);
 
-    if (player1.board.allShipsSunk()) {
-        endGame(player2.name);
+        if (player1.board.allShipsSunk()) {
+            endGame(player2.name);
+        } else {
+            switchCurrentPlayer();
+            ui.highlightActivePlayer(1);
+            ui.displayMessage(`Your turn, ${player1.name}`);
+        }
+    }, 1000);
+}
+
+function createShotMap(size = 10) {
+    const map = [];
+    for (let r = 0; r < size; r++) {
+        map[r] = [];
+        for (let c = 0; c < size; c++) {
+            map[r][c] = 0;
+        }
+    }
+    return map;
+}
+
+function recordComputerAttack(x, y, result) {
+    computerShotMemory[x][y] = result === 'hit' ? 2 : 1;
+}
+
+function getValidNeighbors(x, y, shotMap) {
+    const potentialNeighbors = [
+        [x - 1, y],
+        [x + 1, y],
+        [x, y - 1],
+        [x, y + 1]
+    ];
+    return potentialNeighbors.filter(([x, y]) => {
+        const isOnBoard = x >= 0 && x < 10 && y >= 0 && y < 10;
+        return isOnBoard && shotMap[x][y] === 0;
+    })
+}
+
+const makeComputerMove = () => {
+    let coords;
+    if (targetStack.length > 0) {
+        coords = targetStack.pop();
     } else {
-        switchCurrentPlayer();
-        ui.highlightActivePlayer(1);
-        ui.displayMessage(`Your turn, ${player1.name}`);
+        coords = generateRandomCoords();
+    }
+
+    const result = player2.attack(player1.board, coords);
+    return { x: coords[0], y: coords[1], result};
+}
+
+const generateRandomCoords = () => {
+    let x, y;
+    x = Math.floor(Math.random() * 10);
+    y = Math.floor(Math.random() * 10);
+    let coordKey = `${x},${y}`;
+    if (player2.movesMade.has(coordKey)) {
+        return generateRandomCoords();
+    } else {
+        return [x, y];
     }
 }
 
-function endGame(winnerName) {
+const endGame = (winnerName) => {
     gameOver = true;
     ui.displayMessage(`GAME OVER! ${winnerName} has sunk the enemy fleet!`);
     ui.renderPlayerBoard('player1-board', player1.board, null, true);
