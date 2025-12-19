@@ -9,6 +9,9 @@ let player1 = null;
 let player2 = null;
 let currentPlayer = null;
 let gameOver = false;
+let shipsPlaced = new Set();
+let activeShipData = null;
+let currentDomGrid = null;
 
 const standardFleet = [
     { name: 'Carrier', length: 5 },
@@ -16,22 +19,48 @@ const standardFleet = [
     { name: 'Destroyer', length: 3 },
     { name: 'Submarine', length: 3 },
     { name: 'Patrol Boat', length: 2 },
-];
-
-let currentShipIndex = 0;
-let currentOrientation = 'horizontal';
+    ];
 
 export function init() {
     ui.displayMessage('Welcome to Battleship!');
 
     document.getElementById('pvc-btn').addEventListener('click', () => selectMode('PvC'));
     document.getElementById('pvp-btn').addEventListener('click', () => selectMode('PvP'));
-    document.getElementById('rotate-btn').addEventListener('click', toggleOrientation);
     document.getElementById('start-placement-btn').addEventListener('click', handleNameEntry);
+    document.getElementById('random-placement').addEventListener('click', handleRandomPlacement);
+    document.getElementById('reset-btn').addEventListener('click', handleResetPlacement);
+    document.getElementById('rotate-btn').addEventListener('click', rotateActiveShip);
+    document.getElementById('done').addEventListener('click', () => {
+        ui.hide('done');
+        finishPlacement();
+    });
     document.getElementById('end-turn-btn').addEventListener('click', () => {
         ui.hide('end-turn-btn');
         switchTurnsPvP();
-});
+    });
+}
+
+export function handleRandomPlacement() {
+    currentPlayer.board.reset();
+    shipsPlaced.clear();
+    setActiveShip(null);
+    currentPlayer.board.placeShipsRandomly(standardFleet);
+    standardFleet.forEach(ship => shipsPlaced.add(ship.name));
+    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
+    if (shipsPlaced.size === standardFleet.length) {
+        ui.displayMessage("Random placement complete! Move on?");
+        ui.show('done');
+    }
+}
+
+export function handleResetPlacement() {
+    currentPlayer.board.reset();
+    shipsPlaced.clear();
+    setActiveShip(null);
+    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+    ui.renderShips(standardFleet);
+    ui.displayMessage("Board reset. Place your ships again.");
 }
 
 function selectMode(mode) {
@@ -45,13 +74,14 @@ function selectMode(mode) {
         parentNode.removeChild(child1);
         parentNode.removeChild(child2);
         toBeAltered.textContent = 'Player Name:';
-        ui.displayMessage(`Mode selected: ${mode} - Enter Player name`);
         ui.hide('setup-screen');
         ui.show('name-screen');
+        ui.displayMessage(`Mode selected: ${mode} - Enter Player name`);
+    } else if (gameMode === 'PvP') {
+        ui.hide('setup-screen');
+        ui.show('name-screen');
+        ui.displayMessage(`Mode selected: ${mode} - Enter Player names`);
     }
-    ui.hide('setup-screen');
-    ui.show('name-screen');
-    ui.displayMessage(`Mode selected: ${mode} - Enter Player names`);
 }
 
 function handleNameEntry() {
@@ -77,44 +107,98 @@ function handleNameEntry() {
     }
 }
 
-
 function beginPlacementPhase(player) {
     currentPlayer = player;
-    const opponent = (player === player1) ? player2 : player1;
-    currentShipIndex = 0;
-
-    ui.displayMessage(`${player.name}: Place your ${standardFleet[currentShipIndex].name}`);
-    console.log(`${player.id}`)
-    ui.renderPlayerBoard(`player${player.id}-board`, player.board, handlePlacementClick, true);
+    const opponent = (currentPlayer === player1) ? player2 : player1;
+    const placementMessage = document.getElementById('placement-message');
+    placementMessage.textContent = `What will your strategy be, ${player.name}?`;
+    ui.displayMessage(`${currentPlayer.name}: Drag and drop your ships onto your board`);
+    currentDomGrid = ui.renderPlayerBoard(`player${currentPlayer.id}-board`, currentPlayer.board, null, true);
     ui.renderPlayerBoard(`player${opponent.id}-board`, opponent.board, null, false);
+    ui.renderShips(standardFleet);
+    const boardDiv = document.getElementById(`player${currentPlayer.id}-board`);
+    ui.setupPlacementListeners(boardDiv, currentDomGrid, currentPlayer.board, executePlacement);
 }
 
-function toggleOrientation() {
-    currentOrientation = (currentOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-    document.getElementById('rotate-btn').textContent = `Rotate: ${currentOrientation.toUpperCase()}`;
+export function setActiveShip(shipInfo) {
+    activeShipData = shipInfo;
+
+    if (shipInfo) {
+        console.log(`Active ship set: ${shipInfo.shipId} (Length: ${shipInfo.length})`);
+    } else {
+        console.log("Active ship cleared.");
+    }
 }
 
-function handlePlacementClick(e) {
-    if (gameOver) return;
+export function getActiveShip() {
+    return activeShipData;
+}
 
-    const x = +e.target.dataset.x;
-    const y = +e.target.dataset.y;
-    const shipData = standardFleet[currentShipIndex];
-    const newShip = ship(shipData.length);
+export function rotateActiveShip() {
+    const ship = getActiveShip();
+    if (!ship) {
+        ui.displayMessage('Select a ship first!');
+        return;
+    }
+    ship.orientation = (ship.orientation === 'horizontal') ? 'vertical' : 'horizontal';
+    ui.clearAllPreviews();
+    ui.updateDockShipVisual(ship.element, ship.orientation);
+    const hoveredCell = document.querySelector('.cell:hover');
+    if (hoveredCell) {
+        ui.refreshHoverPreview(hoveredCell);
+    }
+    document.getElementById('rotate-btn').textContent = `Rotate: ${(ship.orientation === 'horizontal') ? 'Vertical' : 'Horizonatal'}`;
+}
+
+export function calculateHead(x, y, length, grabOffset, orientation) {
+    const headX = (orientation === 'vertical') ? x - grabOffset : x;
+    const headY = (orientation === 'horizontal') ? y - grabOffset : y;
+    return [headX, headY];
+}
+
+function refreshPlacementUI(player, boardId) {
+    const boardDiv = document.getElementById(boardId);
+    if (!boardDiv || !player) return;
+    currentDomGrid = ui.renderPlayerBoard(boardId, player.board, null, true);
+    ui.setupPlacementListeners(boardDiv, currentDomGrid, player.board, executePlacement);
+    return currentDomGrid;
+}
+
+function executePlacement(dropX, dropY) {
+    if (!activeShipData) return;
+   
+    const x = Number(dropX);
+    const y = Number(dropY);
+    const length = Number(activeShipData.length);
+    const grabOffset = Number(activeShipData.grabOffset);
+    const shipId = activeShipData.shipId;
+    console.log(shipId);
+    const orientation = activeShipData.orientation;
+
+    const [headX, headY] = calculateHead(x, y, length, grabOffset, orientation);
+    if (headX < 0 || headY < 0) {
+        ui.displayMessage('Ship not in bounds');
+        return;
+    }
 
     try {
-        currentPlayer.board.placeShip(newShip, [x, y], currentOrientation);
-        currentShipIndex++;
-        ui.renderPlayerBoard(`player${currentPlayer.id}-board`, currentPlayer.board, handlePlacementClick, true);
-        if (currentShipIndex < standardFleet.length) {
-            ui.displayMessage(`Place your ${standardFleet[currentShipIndex].name}`);
-        } else {
+        const newShip = ship(length);
+        currentPlayer.board.placeShip(newShip, [headX, headY], activeShipData.orientation);
+        shipsPlaced.add(shipId);
+        
+        ui.removeShipFromDock(shipId);
+        ui.clearAllPreviews();
+        refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+        
+        activeShipData = null;
+        if (shipsPlaced.size === standardFleet.length) {
             finishPlacement();
         }
     } catch (error) {
-        ui.displayMessage("Invalid placement! Try again.");
+        ui.displayMessage("Invalid placement!");
     }
 }
+
 
 function finishPlacement() {
     if (gameMode === 'PvC') {
@@ -122,6 +206,7 @@ function finishPlacement() {
         startGame();
     } else if (gameMode === 'PvP' && currentPlayer === player1) {
         ui.hideAllShips('player1-board', player1.board);
+        shipsPlaced.clear();
         ui.showPassDeviceScreen(player2.name, () => {
             beginPlacementPhase(player2);
         })
@@ -151,17 +236,12 @@ function switchTurnsPvP() {
     ui.renderPlayerBoard(`player${currentPlayer.id}-board`, currentPlayer.board, null, false);
 
     ui.showPassDeviceScreen(nextPlayer.name, () => {
-        // 1. Update Game State
         currentPlayer = nextPlayer;
 
-        // 2. Re-render Boards
-        // Show current player their own ships (true)
         ui.renderPlayerBoard(nextPlayerBoardId, nextPlayer.board, null, true);
         
-        // Show current player the opponent's board with hidden ships (false)
         ui.renderPlayerBoard(opponentBoardId, (nextPlayer === player1 ? player2 : player1).board, handleAttackClick, false);
 
-        // 3. Update UI Labels
         ui.highlightActivePlayer(currentPlayer === player1 ? 1 : 2);
         ui.displayMessage(`${currentPlayer.name}'s turn to attack!`);
     });
@@ -229,5 +309,25 @@ const computerTurn = () => {
     }
 }
 
+function endGame(winnerName) {
+    gameOver = true;
+    ui.displayMessage(`GAME OVER! ${winnerName} has sunk the enemy fleet!`);
+    ui.renderPlayerBoard('player1-board', player1.board, null, true);
+    ui.renderPlayerBoard('player2-board', player2.board, null, true);
 
+    ui.clearAllPreviews();
+    ui.highlightActivePlayer(0);
+    const playAgainScreen = document.getElementById('play-again-screen');
+    if (playAgainScreen) {
+        const finalMessage = document.getElementById('final-message');
+        finalMessage.textContent = `${winnerName} wins!`;
+        ui.show('play-again-screen');
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            window.location.reload();
+        })
+    }
+}
 
+if (process.env.NODE_ENV === 'development') {
+    window.endGame = endGame;
+}
