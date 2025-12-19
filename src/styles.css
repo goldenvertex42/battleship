@@ -420,7 +420,44 @@ h1 {
   box-shadow: 0 4px 6px rgba(66, 153, 225, 0.4);
 }
 
-/* The Battleship Grid */
+/* Gameboards and Ships */
+ship-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; 
+  padding: 10px;
+  border: 1px solid #ccc;
+  width: 200px; 
+}
+
+.ship {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  padding: 5px;
+  transition: all 0.2s ease-in-out;
+  cursor: grab;
+}
+
+.ship.vertical {
+  flex-direction: column; 
+  width: fit-content;
+}
+
+.ship-cell {
+  width: 40px;
+  height: 40px;
+  background-color: #4a5568;
+  border: 1px solid #2d3748;
+}
+
+.ship.selected {
+  outline: 3px solid #4299e1;
+  background-color: rgba(66, 153, 225, 0.1);
+  border-radius: 4px;
+  width: fit-content;
+}
+
 .game-board {
   display: grid;
   grid-template-columns: repeat(10, 40px);
@@ -443,7 +480,17 @@ h1 {
   background-color: #bee3f8;
 }
 
-/* Cell States */
+.cell.placement-preview {
+    background-color: rgba(66, 153, 225, 0.4) !important;
+    outline: 2px dashed #4299e1;
+    z-index: 10;
+}
+
+.cell.placement-preview.invalid {
+    background-color: rgba(245, 101, 101, 0.4) !important;
+    outline-color: #f56565;
+}
+
 .cell.ship-present {
   background-color: var(--ship-color);
 }
@@ -453,7 +500,6 @@ h1 {
   position: relative;
 }
 
-/* Add a visual "dot" for misses */
 .cell.miss::after {
   content: "•";
   color: white;
@@ -471,6 +517,7 @@ h1 {
 
 /* UI Elements: Buttons & Messages */
 #message-area {
+  text-align: center;
   margin-top: 30px;
   font-size: 1.25rem;
   font-weight: bold;
@@ -501,7 +548,7 @@ input[type="text"] {
   font-size: 1rem;
   border: 2px solid var(--cell-border);
   border-radius: 6px;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
 /* The Full-Screen Overlay */
