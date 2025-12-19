@@ -565,12 +565,12 @@ input[type="text"].name-input {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(26, 32, 44, 0.95); /* Deep slate blue/black */
-  backdrop-filter: blur(8px);               /* Modern blur effect */
+  background-color: rgba(26, 32, 44, 0.95);
+  backdrop-filter: blur(8px); 
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;                             /* Ensure it's on top of everything */
+  z-index: 9999;
 }
 
 /* The Modal Box inside the cover */
@@ -591,7 +591,7 @@ input[type="text"].name-input {
 
 /* Ready Button */
 #ready-btn {
-  background-color: #48bb78; /* Green to signal "go" */
+  background-color: #48bb78;
   color: white;
   border: none;
   padding: 15px 30px;
