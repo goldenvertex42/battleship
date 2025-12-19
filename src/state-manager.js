@@ -61,6 +61,7 @@ export function handleResetPlacement() {
     shipsPlaced.clear();
     setActiveShip(null);
     refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
     ui.renderShips(standardFleet);
     ui.displayMessage("Board reset. Place your ships again.");
 }
