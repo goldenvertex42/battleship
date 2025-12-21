@@ -550,7 +550,7 @@ button:hover {
 }
 
 /* Input Styles */
-input[type="text"].name-input {
+div > input[type="text"].name-input {
   padding: 10px;
   font-size: 1rem;
   border: 2px solid var(--cell-border);
