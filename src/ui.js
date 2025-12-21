@@ -5,7 +5,7 @@ const shipDock = document.querySelector('.ship-container');
 let activeBoardLogic = null;
 let activeDomGrid = null;
 
-export function renderShips(fleetArray) {
+export function renderShipDock(fleetArray) {
     fleetArray.forEach(shipData => {
         const shipDiv = document.createElement('div');
         shipDiv.classList.add('ship');
@@ -25,7 +25,7 @@ export function renderShips(fleetArray) {
     });
 }
 
-export function updateDockShipVisual(shipElement, orientation) {
+export function updateDockedShipVisual(shipElement, orientation) {
     if (!shipElement) return;
 
     if (orientation === 'vertical') {
@@ -50,7 +50,7 @@ function highlightPlacementPreview(domGrid, startX, startY, length, orientation,
         const x = Number(startX) + (orientation === 'vertical' ? i : 0);
         const y = Number(startY) + (orientation === 'horizontal' ? i : 0);
         
-        const targetCell = domGrid[x]?.[y];
+        const targetCell = domGrid[x]?.[y]; // optional chaining to safely return undefined when targetCell is invalid
         
         if (targetCell) {
             if (shouldAdd) {
@@ -96,7 +96,7 @@ export function setupPlacementListeners(boardDiv, domGrid, board, onPlacement) {
         const x = parseInt(cell.dataset.x, 10);
         const y = parseInt(cell.dataset.y, 10);
 
-        const [headX, headY] = calculateHead(x, y, shipData.length, shipData.grabOffset, shipData.orientation);
+        const [headX, headY] = calculateHead(x, y, shipData.grabOffset, shipData.orientation);
         
         const isValid = board.isValidPlacement(board.grid, headX, headY, shipData.length, shipData.orientation);
         
@@ -157,7 +157,7 @@ export function setupPlacementListeners(boardDiv, domGrid, board, onPlacement) {
         }
     });
 
-    boardDiv.addEventListener('dragover', (e) => e.preventDefault());
+    boardDiv.addEventListener('dragover', (e) => e.preventDefault()); // allows use of the native HTML Drag and Drop API
 }
 
 export function renderPlayerBoard(containerId, gameboard, handler, showShips) {
