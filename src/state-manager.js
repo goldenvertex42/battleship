@@ -3,7 +3,7 @@ import computerPlayer from "./computer-player";
 import ship from "./ship";
 import * as ui from "./ui";
 
-
+// Declare initial states and maps
 let gameMode = null;
 let player1 = null;
 let player2 = null;
@@ -42,30 +42,6 @@ export function init() {
     });
 }
 
-export function handleRandomPlacement() {
-    currentPlayer.board.reset();
-    shipsPlaced.clear();
-    setActiveShip(null);
-    currentPlayer.board.placeShipsRandomly(standardFleet);
-    standardFleet.forEach(ship => shipsPlaced.add(ship.name));
-    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
-    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
-    if (shipsPlaced.size === standardFleet.length) {
-        ui.displayMessage("Random placement complete! Move on?");
-        ui.show('done');
-    }
-}
-
-export function handleResetPlacement() {
-    currentPlayer.board.reset();
-    shipsPlaced.clear();
-    setActiveShip(null);
-    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
-    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
-    ui.renderShips(standardFleet);
-    ui.displayMessage("Board reset. Place your ships again.");
-}
-
 function selectMode(mode) {
     gameMode = mode;
     if (gameMode === 'PvC') {
@@ -90,7 +66,7 @@ function selectMode(mode) {
 function handleNameEntry() {
     const name1Input = document.getElementById('player1-name-input');
     const name1 = name1Input.value || 'Player 1';
-
+    
     if (!player1 && gameMode === 'PvC') {
         player1 = player(name1, 1);
         player2 = computerPlayer('CPU', 2);
@@ -110,24 +86,56 @@ function handleNameEntry() {
     }
 }
 
+
 function beginPlacementPhase(player) {
     currentPlayer = player;
     const opponent = (currentPlayer === player1) ? player2 : player1;
     const placementMessage = document.getElementById('placement-message');
     placementMessage.textContent = `What will your strategy be, ${player.name}?`;
-    ui.displayMessage(`${currentPlayer.name}: Drag and drop your ships onto your board`);
+    ui.displayMessage(`${currentPlayer.name}: Drag and drop or click and place`);
     currentDomGrid = ui.renderPlayerBoard(`player${currentPlayer.id}-board`, currentPlayer.board, null, true);
     ui.renderPlayerBoard(`player${opponent.id}-board`, opponent.board, null, false);
-    ui.renderShips(standardFleet);
+    ui.renderShipDock(standardFleet);
     const boardDiv = document.getElementById(`player${currentPlayer.id}-board`);
     ui.setupPlacementListeners(boardDiv, currentDomGrid, currentPlayer.board, executePlacement);
 }
 
-export function setActiveShip(shipInfo) {
-    activeShipData = shipInfo;
+export function handleRandomPlacement() {
+    currentPlayer.board.reset();
+    shipsPlaced.clear();
+    setActiveShip(null);
+    currentPlayer.board.placeShipsRandomly(standardFleet);
+    standardFleet.forEach(ship => shipsPlaced.add(ship.name));
+    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
+    if (shipsPlaced.size === standardFleet.length) {
+        ui.displayMessage("Random placement complete! Move on?");
+        ui.show('done');
+    }
+}
 
-    if (shipInfo) {
-        console.log(`Active ship set: ${shipInfo.shipId} (Length: ${shipInfo.length})`);
+export function handleResetPlacement() {
+    currentPlayer.board.reset();
+    shipsPlaced.clear();
+    setActiveShip(null);
+    refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+    standardFleet.forEach(ship => ui.removeShipFromDock(ship.name.toLowerCase()));
+    ui.renderShipDock(standardFleet);
+    ui.displayMessage("Board reset. Place your ships again.");
+}
+
+export function setActiveShip(newShipData) {
+    if (activeShipData !== newShipData) {
+        if (activeShipData !== null && activeShipData.orientation === 'vertical') {
+            rotateActiveShip(); // reset a vertical ship to horizontal when being 'unselected'
+        }                       // safeguard against muddling of active ship/rotate button confusion
+        activeShipData = newShipData;
+        ui.clearAllPreviews();
+        document.getElementById('rotate-btn').textContent = `Rotate: To Vertical`;
+    }
+    
+    if (newShipData) {
+        console.log(`Active ship set: ${newShipData.shipId} (Length: ${newShipData.length})`);
     } else {
         console.log("Active ship cleared.");
     }
@@ -138,22 +146,24 @@ export function getActiveShip() {
 }
 
 export function rotateActiveShip() {
-    const ship = getActiveShip();
-    if (!ship) {
+    if (!activeShipData) {
         ui.displayMessage('Select a ship first!');
         return;
     }
-    ship.orientation = (ship.orientation === 'horizontal') ? 'vertical' : 'horizontal';
+
+    const newOrientation = (activeShipData.orientation === 'horizontal') ? 'vertical' : 'horizontal';
+    activeShipData.orientation = newOrientation;
+    
     ui.clearAllPreviews();
-    ui.updateDockShipVisual(ship.element, ship.orientation);
+    ui.updateDockedShipVisual(activeShipData.element, activeShipData.orientation);
     const hoveredCell = document.querySelector('.cell:hover');
     if (hoveredCell) {
         ui.refreshHoverPreview(hoveredCell);
     }
-    document.getElementById('rotate-btn').textContent = `Rotate: ${(ship.orientation === 'horizontal') ? 'Vertical' : 'Horizonatal'}`;
+    document.getElementById('rotate-btn').textContent = `Rotate: ${(ship.orientation === 'horizontal') ? 'To Vertical' : 'To Horizonatal'}`;
 }
 
-export function calculateHead(x, y, length, grabOffset, orientation) {
+export function calculateHead(x, y, grabOffset, orientation) {
     const headX = (orientation === 'vertical') ? x - grabOffset : x;
     const headY = (orientation === 'horizontal') ? y - grabOffset : y;
     return [headX, headY];
@@ -178,7 +188,7 @@ function executePlacement(dropX, dropY) {
     console.log(shipId);
     const orientation = activeShipData.orientation;
 
-    const [headX, headY] = calculateHead(x, y, length, grabOffset, orientation);
+    const [headX, headY] = calculateHead(x, y, grabOffset, orientation);
     if (headX < 0 || headY < 0) {
         ui.displayMessage('Ship not in bounds');
         return;
@@ -192,6 +202,9 @@ function executePlacement(dropX, dropY) {
         ui.removeShipFromDock(shipId);
         ui.clearAllPreviews();
         refreshPlacementUI(currentPlayer, `player${currentPlayer.id}-board`);
+        if (activeShipData.orientation === 'vertical') {
+            document.getElementById('rotate-btn').textContent = 'Rotate: To Vertical';
+        }
         
         activeShipData = null;
         if (shipsPlaced.size === standardFleet.length) {
